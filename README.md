@@ -2,7 +2,7 @@
 
 Ubisoft Entertainment is a French video game publisher headquartered in Paris, France. It is known for publishing games for several acclaimed video game franchises, including Assassin’s Creed, Just Dance, Far Cry, For Honor, and more.
 
-This is a simulated school project based on a real A/B Test at Ubisoft, focusing on the For Honor game's Buy Now page. The redesign aims to simplify the buying process by reducing the need for scrolling and minimizing clicks. The goal is to increase customer conversions.
+This is a simulated school project based on a real A/B Test at Ubisoft which proved to increase lead generation rate by 12%. This test will focus on the For Honor game's Buy Now page. The redesign aims to simplify the buying process by reducing the need for scrolling and minimizing clicks. The goal is to increase customer conversions.
 
 ### a. The Buy Now page before the testing phase:
 
@@ -49,5 +49,5 @@ Users will be randomly assigned to either the control group (existing design) or
 ## 3. Result
 After running the simulated A/B testing, there is an increase of 1.4% in conversion rate when using the new design. According to the z-test result, this difference is statistically difference.
 
-The next step can be discussing the result with stakeholders and agreeing on a ship/no-ship decision
+The next step can be discussing the result with stakeholders and agreeing on a ship/no-ship decision.
 
