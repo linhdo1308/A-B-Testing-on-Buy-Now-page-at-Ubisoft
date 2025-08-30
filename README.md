@@ -27,15 +27,27 @@ User Journey:
 ## 2. Test Design
 ### a. A/B Test Details
 - Conversion Definition: For this test, a conversion is defined as a completed purchase.
-- Data Collection: All customer interactions that lead to a conversion will be tracked, including page visits, clicks, and time spent on the For Honor page.
-- Traffic Segmentation: All customer traffic to the For Honor page is available for the test.
 - Minimum Effect of Interest (MEI): The MEI is defined as a 1 percentage point increase in conversions, on an absolute basis.
+- Unit of conversion = user
+- Hypothesis:
+-   Null hypothesis: The new design has no impact on conversation rate.
+-   Alternative hypothesis: The new design increases the conversation rate by at least 1%.
+
 
 ### b. Experimental Design
-- Experimental Design: How will customers be assigned be assigned to test and control groups? What is the required sample size? How long should the test run?
-- Data Analysis Plan: What statistical methods would you use to analyze whether the new page produces an increase in conversions?
+- alpha = 0.05
+- power = 0.8
+- sample size = 6263 (per group) (allocation = 50%)
+- test duration = 24 days
 
+Note: The sample size and test duration are calculated based on simulated historical data
 
+Assumptions: no seasonal effect during the test (campaign promotion, weekly seasonality, …)
 
+Users will be randomly assigned to either the control group (existing design) or the treatment group (new design) to ensure unbiased comparisons.
 
+## 3. Result
+After running the simulated A/B testing, there is an increase of 1.4% in conversion rate when using the new design. According to the z-test result, this difference is statistically difference.
+
+The next step can be discussing the result with stakeholders and agreeing on a ship/no-ship decision
 
