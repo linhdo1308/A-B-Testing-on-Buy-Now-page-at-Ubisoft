@@ -1,0 +1,161 @@
+---
+title: "Fluentio"
+format: 
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    toc-title: "Contents"
+execute:
+  warning: false
+  message: false
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Question 1
+
+Use the historical data to calculate ARPU and SDRPU
+
+```{r cars}
+# import library
+library(tidyverse)
+library(dplyr)
+library(rpact)
+
+
+# import data
+df <- read_csv('https://raw.githubusercontent.com/jefftwebb/data/main/fluent_historical.csv')
+head(df)
+
+# calculate arpu and sdrpu
+df %>% 
+  group_by(customer_id, month) %>%
+  summarize(monthly_revenue = sum(paid), .groups = 'drop') %>%
+  summarize(arpu = mean(monthly_revenue),
+            sdrpu = sd(monthly_revenue))
+  
+```
+
+ARPU = 2.82
+SDRPU = 10.94
+
+# Question 2
+
+What is the total sample size required for a traditional fixed duration A/B test, assuming ARPU of 3.00, MEI of .50 and SDRPU of $11.00?
+
+```{r}
+n <- power.t.test(delta = 0.5,
+             sd = 11,
+             sig.level = 0.05,
+             power = .8,
+             alternative = "one.sided")$n
+  
+total_sample_size <- ceiling(n) * 2
+total_sample_size
+```
+
+Each group needs 5956 samples. Total sample size is 11972.
+
+# Question 3
+
+What is the required duration in days for this A/B test using the sample size from the previous question? Hint: Calculate the average number of new subscribers (free or paid) per day in 2024. This count should exclude customers making repeat subscription payments, using only their first appearance in the data.
+
+
+```{r}
+avg_new_mem <- df |>
+  arrange(customer_id, date) |>
+  group_by(customer_id)|>
+  slice(1) |>  
+  group_by(date) |>
+  summarize(n = n(), .groups = "drop") |>
+  summarize(avg_new_mem = mean(n)) |> 
+  pull(avg_new_mem)
+
+avg_new_mem
+
+duration <- total_sample_size/avg_new_mem
+duration
+```
+
+Required duration is 140 days or approximately 4.6 months.
+
+# Question 4
+
+We can definitely use CUPED in this project because monthly data is available and there are new users every day. We can use the previous month revenue (for example January) and the subsequent month revenue to calculate the correlation and subsequently, the required sample size and duration. Having these in minds, we can set up an experiment accordingly.
+
+# Question 5
+
+Size this experiment for a group sequential test with 4 checkpoints. The parameters will be the same: ARPU of 3.00, MEI of .50 and SDRPU of 11.00. Alpha and beta spending will be defined with O’Brien-Fleming. You keep alpha at .05 and power at .8.
+
+- What are the sample sizes at each checkpoint?
+- What is the expected sample size under H1?
+- What would the duration of the experiment be given the expected sample size under H1?
+
+```{r}
+# size the experiment for a group sequential test with 4 checkpoints.
+getDesignGroupSequential(typeOfDesign = "asOF", kMax = 5,
+        alpha = 0.05, beta = .2, typeBetaSpending = "bsOF") |>
+    getSampleSizeMeans(alternative = 0.5, stDev = 11) |>
+    summary() 
+
+
+gst_duration <- 9814/avg_new_mem
+gst_duration
+```
+
+- The sample size is 2820, 5638, 8456, 11276 at each checkpoint.
+- The expected sample size under H1 is 9814
+- The duration given expected sample size at H1 is 115 days
+
+
+# Question 6
+
+Suppose that the true effect of the treatment is $.25. What is the probability given this group sequential design that the experiment could be stopped early?
+
+If true effect of the treatment is 0.25, it is less than MEI of 0.5 (H0). It is likely that we would stop the experiment early as we discover this effect at an early checkpoint. The probability for early stopping under H0 is 0.0761, 0.4177, 0.2947, 0.1460 from checkpoint 1 to 4 respectively. It looks like we are most likely to be able to reject H1 at checkpoint 2 as it has the highest probability of 0.42. Interestingly, the expected sample size if H1 is true is 9814, while it is 8456 and 11276 at checkpoint 3 and 4 respectively. This means if we don't stop at checkpoint 2, we will still be able to stop somewhere between checkpoint 3 and 4 where there is enough sample size for H1.
+
+
+# Question 7
+Write a brief proposal for the experiment based on your research that includes discussion of:
+
+## 1. Background and objectives
+Our team is always striving for increase revenue through optimizing the pricing structure of the sucscription plans. In our current “freemium” subscription model, we have 2 plans: Free and Plus (USD 9.99). We want to consider adding one more Pro plan (USD 14.99) with more advanced features and conduct an A/B Test to decide whether it impacts our average revenue per user (ARPU). 
+
+Following is the details on each plan:
+
+- Free plan: Ad-supported with limited features
+- Plus plan: $9.99/month with ad-free experience
+- Pro plan: $14.99/month with ad-free experience, pronunciation training and simulated conversation with AI, and advanced calendaring tools with reminders to maintain progress 
+
+## 2. Hypothesis
+- H0: The ARPU difference between the treatment and control group is less than or equal to the minimal effect of interest of $0.5
+- H1: The ARPU difference between the treatment and control group is greater than the minimal effect of interest of $0.5
+
+## 3. Experimental Design
+We will conduct group sequential test with 4 checkpoints. The point of using this method is to allow for early experiment stopping in case of either insignificant or significant effect. In particular, we will apply O’Brien-Fleming to allow for early conservative experiment, reducing the risk of mistakenly concluding there is an effect while there is actually not early on. Users will be randomly assigned to either the control group (existing design with free and plus plan) or the treatment group (new design with free, plus and pro plan) to ensure unbiased comparisons.
+
+- Success metrics: ARPU increases by USD 0.5
+- Minimum Effect of Interest (MEI) = 0.5
+- alpha = 0.05
+- beta = 0.2
+- sample size = 2820, 5638, 8456, 11276 at each checkpoint
+- test duration = 115 days or 3 months and 23 days
+
+## 4. Possible threats to validity
+There are some popular threats that could affect experiment validity:
+
+- Selection bias: the sample is not representative of your entire audience. For example, in order to manipulate the result, the team runs experiment with the population that is most likely to sign up for Pro plan. 
+- Instrumentation effect: errors related to your testing tool and code implementations. For example, during the test, there are IT issues leading to a portion of users in treatment group not able to log in.
+- The company runs a promotion only to a subset of users that disproportionately overlaps with the control group. This could increase ARPU in control, making the Pro plan look less effective than it really is.
+- A competitor launches a new language app with a huge discount during the test. If users in the treatment group are more likely to be affected, ARPU could drop in the treatment group independently of the new pricing structure
+
+## 5. Analysis plan
+- Step 1: Communicate the plan with the internal team and stakeholders (engineer, product team) to set up the experiment
+- Step 2: Run group sequential test A/B testing for the whole period (no change on the experimental design). During the testing period, track the arpu to ensure the number is correct (i.e if there is a sudden increase/decrease in the number)
+- Step 3: At each checkpoint, calculate arpu for each group and run a t-test to ensure statistical significance. We can stop at efficacy or futility if necessary
+- Step 4: Discuss the result with stakeholders and decide next step
+- Note: Regardless of failed or successful test, document all insights and learning lessons for future reference
