@@ -1,0 +1,253 @@
+---
+title: "SkyConnect Case"
+format: 
+  html:
+    toc: true
+    toc-depth: 3
+    toc-location: left
+    toc-title: "Contents"
+execute:
+  warning: false
+  message: false
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Question 1
+
+Use the SkyConnect data to calculate inputs to the power calculation for experiment sizing. Report historical average revenue per user (ARPU) and the standard deviation of revenue per user (SDRPU).
+
+
+```{r}
+# import library
+library(tidyverse)
+library(readr)
+library(dplyr)
+
+# import data
+df <- read_csv('https://raw.githubusercontent.com/jefftwebb/data/refs/heads/main/SkyConnect_data.csv')
+head(df)
+
+# Calculate ARPU
+arpu <- df %>%
+  group_by(customer_id) %>%
+  summarize(avg_revenue_per_customer = mean(revenue)) %>%
+  summarize(arpu = mean(avg_revenue_per_customer)) %>%
+  pull(arpu)
+
+print(arpu)
+
+# Calculate the standard deviation of revenue per user (SDRPU)
+sdrpu <- df %>%
+  group_by(customer_id) %>%
+  summarize(avg_revenue_per_customer = mean(revenue)) %>%
+  summarize(sdrpu = sd(avg_revenue_per_customer)) %>%
+  pull(sdrpu)
+
+print(sdrpu)
+```
+ARPU = 5.696
+SDRPU = 14.45
+
+# Question 2
+
+What is the required sample size for this A/B test? 
+
+```{r}
+# Calculate required sample size
+power.t.test(delta = 0.5,
+             sd = sdrpu,
+             sig.level = 0.05,
+             power = .8,
+             alternative = "one.sided")
+  
+total_sample_size <- 10329 * 2
+total_sample_size
+```
+Each group needs 10329 users so the total sample size is 20658.
+
+
+# Question 3
+
+What is the required duration in days for this A/B test assuming: (1) The sample size from the previous question; (2) The average number of members who would be new to the experiment each day, assuming that they enter the experiment on their first booking during the test period. Remember: Members will see only the control or treatment condition for the period of the test.
+
+
+```{r}
+# Add 'new_to_the_experiment' column
+df <- df %>%
+  group_by(customer_id) %>%
+  arrange(session_date) %>%
+  mutate(new_to_the_experiment = ifelse(row_number() == 1, "yes", "no")) %>%
+  ungroup()
+  
+# Calculate the average number of new members each day  
+avg_new_members <- df %>%
+  filter(new_to_the_experiment == 'yes') %>%
+  group_by(session_date) %>%
+  summarize(new_members = n()) %>%
+  summarize(avg_new_members = mean(new_members)) %>%
+  pull(avg_new_members)
+
+print(avg_new_members)
+  
+duration <- total_sample_size/avg_new_members
+print(duration)
+```
+
+The test duration is 78 days
+
+
+# Question 4
+
+Tony would like to reduce the duration of the test using CUPED. He knows the technique requires repeat customers (which SkyConnect Plus members are by definition) and that it works best to reduce sample sizes when spending behaviors are stable month-to-month. Report the customer level correlation in average revenue between January and February 2024. Hint: to get the correlation you will need to compute average spending per month for customers who were active in both January and February.
+
+
+```{r}
+library(lubridate)
+
+# Create a new data frame with total spending per customer for Jan & Feb
+rev_jan_feb <- df %>%
+  filter(year(session_date) == 2024, month(session_date) %in% c(1, 2)) %>%
+  group_by(customer_id) %>%
+  summarize(
+    rev_jan = sum(revenue[month(session_date) == 1]),
+    rev_feb = sum(revenue[month(session_date) == 2])
+  )
+
+# View the new data frame
+head(rev_jan_feb)
+
+# customer level correlation in avg revenue between Jan and Fed 2024 
+cor <- rev_jan_feb$rev_jan %>% cor(rev_jan_feb$rev_feb)
+
+print(cor)
+
+cor(rev_jan_feb$rev_jan, rev_jan_feb$rev_feb)
+
+```
+
+The correlation is 0.7665993
+
+# Question 5
+
+What is the updated sample size and approximate duration for the experiment using CUPED? Round your answer up to the closest day. Hint: use the correlation from the previous question as an input to the variance reduction factor when computing adjusted Cohen’s d.
+
+```{r}
+# Calculate original d
+ori_d <- 0.5/sdrpu
+print(ori_d)
+
+# Calculate variance reduction factor and the adjusted d
+vrf <- sqrt(1 - cor^2)
+print(vrf)
+adjusted_d <- ori_d / vrf
+
+print(adjusted_d)
+
+# Calculate updated sample size
+up_sample_size <- total_sample_size * (1 - cor^2)
+print(up_sample_size)
+
+# calculate the updated duration
+up_duration <- up_sample_size/avg_new_members
+print(up_duration)
+
+```
+
+Adjusted d = 0.054
+Total updated sample size = 8518
+New duration = 32 days
+
+# Question 6
+
+a. Simulate the sequential enrollment process by including all bookings for customers as they enter the experiment, stopping once you’ve enrolled the required number of unique customers required for the experiment (from Question 5). A customer enters the experiment on their first booking and remains in their assigned group for all subsequent bookings. (Hint: Use the new column to subset the data, keeping rows where new is less than or equal to the required CUPED sample size.)
+
+b. Analyze the treatment effect as for a traditional A/B test using a t-test. Report the effect as a 95% confidence interval and discuss statistical significance.
+
+The 95% CI is [-1.44, -0.18]. With p-value of 0.01, the effect is statistically significant.
+
+c. Analyze and report the treatment effect using CUPED. Report the effect as a 95% confidence interval and discuss statistical significance.
+
+The 95% CI is [-0.47 , 0.13]. With p-value of 0.26, this effect is not statistically significant.
+
+
+```{r}
+# import test data
+test_df <- read.csv('https://raw.githubusercontent.com/jefftwebb/data/refs/heads/main/SkyConnect_test_data.csv')
+tail(test_df)
+
+# a. subset data according to total required CUPED sample size 8518 users for 2 groups
+test_df <- test_df %>%
+  filter(new <= 8518)
+
+tail(test_df)
+
+# b. Analyze the treatment effect as for a traditional A/B test using a t-test. Report the effect as a 95% confidence interval and discuss statistical significance.
+# One-sided t-test
+t_res <- t.test(
+  revenue ~ treatment,     
+  data = test_df,
+  alternative = "two.sided", 
+  var.equal = TRUE        
+)
+
+# Extract effect estimate (mean difference)
+effect <- diff(t_res$estimate)  
+
+# 95% confidence interval
+ci_lower <- t_res$conf.int[1]
+ci_upper <- t_res$conf.int[2]
+
+print(paste("Estimated treatment effect:", round(effect, 2)))
+print(paste("95% CI: [", round(ci_lower, 2), ",", round(ci_upper, 2), "]"))
+print(paste("p-value:", t_res$p.value))
+
+
+# c. Analyze and report the treatment effect using CUPED. Report the effect as a 95% confidence interval and discuss statistical significance.
+
+# Compute theta
+theta <- cov(test_df$revenue, test_df$historical_avg_revenue) / var(test_df$historical_avg_revenue)
+theta
+
+test_df <- test_df %>%
+  mutate(revenue_cuped = revenue - theta * (historical_avg_revenue - mean(historical_avg_revenue)))
+
+test_df <- test_df %>%
+  mutate(group = ifelse(treatment == 1, "treatment", "control"))
+
+# Compute CUPED-adjusted revenue
+t_res_cuped <- t.test(
+  revenue_cuped ~ group,
+  data = test_df,
+  alternative = "two.sided",
+  var.equal = TRUE
+)
+
+# Extract effect estimate and 95% CI
+effect_cuped <- diff(t_res_cuped$estimate)      # treatment - control
+ci_lower <- t_res_cuped$conf.int[1]
+ci_upper <- t_res_cuped$conf.int[2]
+
+print(paste("CUPED-adjusted treatment effect:", round(effect_cuped, 2)))
+print(paste("95% CI: [", round(ci_lower, 2), ",", round(ci_upper, 2), "]"))
+print(paste("p-value:", t_res_cuped$p.value))
+
+
+```
+
+
+# Question 7
+Should Tony recommend that SkyConnect implement the new seat selection interface? Write a brief paragraph to executives that:
+
+- Summarizes the design and results of the experiment.
+- Considers possible threats to validity.
+- Argues for a recommendation
+
+In general, Tony should not recommend the new seat selection interface because the effect is negative according to the A/B testing result. The new interface will reduce the ARPU by 0.81. 
+
+Some issues could have affected the results, such as differences between customers, the order in which they joined the test, and seasonal changes in behavior. Taking all this into account, the new interface does not appear to increase revenue in a meaningful way.
+
+Tony does not suggest implementing the new seat selection interface now. It may need more observation with testing or changes before it can improve customer spending. Ideas can be brainstormed through customer behavior observation or online research of the same case.
