@@ -12,8 +12,7 @@ This repository showcases A/B testing case studies across gaming, SaaS, and lang
 - **Key Metrics:** Conversion rate, funnel completion, user drop-off  
 - **Techniques Used:** Python, statistical hypothesis testing, sample size estimation, A/B test simulation  
 
-[View Detailed README](./Ubisoft - Buy Now page/README.md)  
-[View Detailed README](./Ubisoft-Buy-Now-Page/README.md)
+[View detailed README](https://github.com/linhdo1308/A-B-Testing-projects/tree/main/Ubisoft%20-%20Buy%20Now%20page)
 
 ---
 
@@ -23,7 +22,7 @@ This repository showcases A/B testing case studies across gaming, SaaS, and lang
 - **Key Metrics:** Upgrade conversion rate, engagement, monetization  
 - **Techniques Used:** R, SQL, data aggregation, t-tests, cohort analysis  
 
-[View Detailed README](./SkyConnect - redesigned seat selection interface/README.md)  
+[View detailed README](https://github.com/linhdo1308/A-B-Testing-projects/tree/main/SkyConnect%20-%20redesigned%20seat%20selection%20interface)
 
 ---
 
@@ -33,7 +32,7 @@ This repository showcases A/B testing case studies across gaming, SaaS, and lang
 - **Key Metrics:** ARPU, SD of revenue per user, early stopping probabilities, revenue concentration  
 - **Techniques Used:** R (tidyverse, rpact), group sequential design, CUPED variance reduction, revenue analytics  
 
-[View Detailed README](./Fluentio pricing/README.md)  
+[View detailed README](https://github.com/linhdo1308/A-B-Testing-projects/tree/main/Fluentio%20pricing)
 
 ---
 
