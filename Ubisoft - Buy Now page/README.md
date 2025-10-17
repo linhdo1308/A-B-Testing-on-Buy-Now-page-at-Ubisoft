@@ -1,53 +1,91 @@
+# Ubisoft A/B Test — For Honor Buy Now Page Optimization
+
 ## 1. Project Overview
 
-Ubisoft Entertainment is a French video game publisher headquartered in Paris, France. It is known for publishing games for several acclaimed video game franchises, including Assassin’s Creed, Just Dance, Far Cry, For Honor, and more.
+**Ubisoft Entertainment** is a French video game publisher headquartered in Paris, France, known for major franchises such as *Assassin’s Creed*, *Just Dance*, *Far Cry*, and *For Honor*.
 
-This is a simulated school project based on a real A/B Test at Ubisoft which proved to increase lead generation rate by 12%. This test will focus on the For Honor game's Buy Now page. The redesign aims to simplify the buying process by reducing the need for scrolling and minimizing clicks. The goal is to increase customer conversions.
+This is a **simulated A/B testing project** based on a real Ubisoft experiment that increased lead generation rates by **12%**.  
+The goal is to **optimize the “Buy Now” page** for *For Honor* by simplifying the purchase flow — reducing scrolling and clicks — to improve customer conversions.
 
-### a. The Buy Now page before the testing phase:
+---
 
-<p align="center">
-  <img width="500" height="500" alt="image" src="https://github.com/user-attachments/assets/0569e536-4095-4984-8a9e-8bc3c4b51429" />
-</p>
-
-User Journey:
-- The user on the Buy Now page would first have to select the preferred version of the game from the five versions displayed on the screen.
-- The user was then expected to scroll down and select the platform on which they would play.
-- The final step was the Place Your Order button that took them to the checkout page on the Ubisoft store.
-
-### b. The New Test Variation:
+### a. Original “Buy Now” Page (Before Testing)
 
 <p align="center">
-<img width="500" height="750" alt="image" src="https://github.com/user-attachments/assets/98a2f95f-218a-4b9e-a6e6-16f77c9ae4d4" />
+  <img width="500" height="500" alt="For Honor Buy Now page - original" src="https://github.com/user-attachments/assets/0569e536-4095-4984-8a9e-8bc3c4b51429" />
 </p>
 
-- In the redesigned test layout, the section to choose edition, console, as well as the Order Now step were moved to the top of the left column, with an edition comparison.
-- The new design eliminated scroll and improved the interaction time/rate on the Buy now page.
+**User Journey:**
+1. The user selects the preferred version of the game from five displayed editions.
+2. The user scrolls down to choose their platform (e.g., PlayStation, Xbox, PC).
+3. Finally, they click **“Place Your Order”** to proceed to checkout on the Ubisoft store.
+
+This multi-step process required **excessive scrolling** and **extra clicks**, which likely reduced conversion rates.
+
+---
+
+### b. New Test Variation (Redesigned Layout)
+
+<p align="center">
+  <img width="500" height="750" alt="For Honor Buy Now page - redesigned test" src="https://github.com/user-attachments/assets/98a2f95f-218a-4b9e-a6e6-16f77c9ae4d4" />
+</p>
+
+**Key Improvements:**
+- Combined edition, console, and “Order Now” options at the **top left** for easier access.  
+- Added an **edition comparison section** for quicker decision-making.  
+- Eliminated the need to scroll, improving **interaction speed** and **user experience**.
+
+---
 
 ## 2. Test Design
-### a. A/B Test Details
-- Conversion Definition: For this test, a conversion is defined as a completed purchase.
-- Minimum Effect of Interest (MEI): The MEI is defined as a 1 percentage point increase in conversions, on an absolute basis.
-- Unit of conversion = user
-- Hypothesis:
--   Null hypothesis: The new design has no impact on conversation rate.
--   Alternative hypothesis: The new design increases the conversation rate by at least 1%.
 
+### 🧪 a. A/B Test Details
+- **Conversion Definition:** A completed purchase  
+- **Minimum Effect of Interest (MEI):** +1 percentage point in conversion rate (absolute)  
+- **Unit of Conversion:** User  
 
-### b. Experimental Design
-- alpha = 0.05
-- power = 0.8
-- sample size = 6263 (per group) (allocation = 50%)
-- test duration = 24 days
+**Hypotheses:**
+- *Null (H₀):* The new design has no impact on conversion rate  
+- *Alternative (H₁):* The new design increases conversion rate by at least 1%  
 
-Note: The sample size and test duration are calculated based on simulated historical data
+---
 
-Assumptions: no seasonal effect during the test (campaign promotion, weekly seasonality, …)
+### b. Experimental Setup
+| Parameter | Value |
+|------------|--------|
+| α (Significance level) | 0.05 |
+| Power (1 - β) | 0.8 |
+| Sample Size | 6,263 users per group |
+| Allocation | 50% control / 50% treatment |
+| Test Duration | 24 days |
 
-Users will be randomly assigned to either the control group (existing design) or the treatment group (new design) to ensure unbiased comparisons.
+**Assumptions:**
+- No seasonal or promotional effects during testing  
+- Random assignment ensures unbiased comparisons  
 
-## 3. Result
-After running the simulated A/B testing, there is an increase of 1.4% in conversion rate when using the new design. According to the z-test result, this difference is statistically difference.
+---
 
-The next step can be discussing the result with stakeholders and agreeing on a ship/no-ship decision.
+## 3. Results
 
+After running the simulated A/B test:
+
+- **Conversion Rate Increase:** +1.4% (treatment vs. control)  
+- **Statistical Test:** z-test  
+- **Result:** Difference is *statistically significant*
+
+The redesigned layout **significantly improved conversion rates**.  
+**Next Step:** Present findings to stakeholders and make a *ship/no-ship* decision.
+
+---
+
+### Tools & Techniques
+- Python (Pandas, NumPy, SciPy, Matplotlib)
+- Statistical hypothesis testing (z-test)
+- A/B test simulation and sample size estimation
+
+---
+
+**📈 Outcome:**  
+Improved user conversion by simplifying the buying experience and reducing friction in the user journey.
+
+---
